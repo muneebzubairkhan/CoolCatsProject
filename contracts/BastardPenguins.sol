@@ -17,9 +17,9 @@ contract BastardPenguins is ERC721, Ownable {
 
     uint256 public constant penguinPrice = 0.02 ether; // same as 0.02 * 1e18
 
-    uint256 public constant maxApePurchase = 20;
+    uint256 public constant maxPenguinPurchase = 20;
 
-    uint256 public MAX_APES;
+    uint256 public MAX_PENGUINS;
 
     bool public saleIsActive = false;
 
@@ -31,7 +31,7 @@ contract BastardPenguins is ERC721, Ownable {
         uint256 maxNftSupply,
         uint256 saleStart
     ) ERC721(name, symbol) {
-        MAX_APES = maxNftSupply;
+        MAX_PENGUINS = maxNftSupply;
         REVEAL_TIMESTAMP = saleStart + (86400 * 9);
     }
 
@@ -41,9 +41,9 @@ contract BastardPenguins is ERC721, Ownable {
     }
 
     /**
-     * Set some Bored Apes aside
+     * Set some Bastard Penguins aside
      */
-    function reserveApes() public onlyOwner {
+    function reservePenguins() public onlyOwner {
         uint256 supply = totalSupply();
         uint256 i;
         for (i = 0; i < 30; i++) {
@@ -77,17 +77,17 @@ contract BastardPenguins is ERC721, Ownable {
     }
 
     /**
-     * Mints Bored Apes
+     * Mints Bastard Penguins
      */
-    function mintApe(uint256 numberOfTokens) public payable {
-        require(saleIsActive, "Sale must be active to mint Ape");
+    function mintPenguin(uint256 numberOfTokens) public payable {
+        require(saleIsActive, "Sale must be active to mint Penguin");
         require(
-            numberOfTokens <= maxApePurchase,
+            numberOfTokens <= maxPenguinPurchase,
             "Can only mint 20 tokens at a time"
         );
         require(
-            totalSupply().add(numberOfTokens) <= MAX_APES,
-            "Purchase would exceed max supply of Apes"
+            totalSupply().add(numberOfTokens) <= MAX_PENGUINS,
+            "Purchase would exceed max supply of Penguins"
         );
         require(
             penguinPrice.mul(numberOfTokens) <= msg.value,
@@ -96,7 +96,7 @@ contract BastardPenguins is ERC721, Ownable {
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
             uint256 mintIndex = totalSupply();
-            if (totalSupply() < MAX_APES) {
+            if (totalSupply() < MAX_PENGUINS) {
                 _safeMint(msg.sender, mintIndex);
             }
         }
@@ -105,7 +105,7 @@ contract BastardPenguins is ERC721, Ownable {
         // the end of pre-sale, set the starting index block
         if (
             startingIndexBlock == 0 &&
-            (totalSupply() == MAX_APES || block.timestamp >= REVEAL_TIMESTAMP)
+            (totalSupply() == MAX_PENGUINS || block.timestamp >= REVEAL_TIMESTAMP)
             //                             1000th        >=          1500th
         ) {
             startingIndexBlock = block.number; // Identity is revealed //
@@ -119,12 +119,12 @@ contract BastardPenguins is ERC721, Ownable {
         require(startingIndex == 0, "Starting index is already set");
         require(startingIndexBlock != 0, "Starting index block must be set");
 
-        // random() function of bored apes
+        // random() function of bastard penguins
         // startingIndex === startingIpfsId
-        startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_APES;
+        startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_PENGUINS;
         // Just a sanity case in the worst case if this function is called late (EVM only stores last 256 block hashes)
         if (block.number.sub(startingIndexBlock) > 255) {
-            startingIndex = uint256(blockhash(block.number - 1)) % MAX_APES;
+            startingIndex = uint256(blockhash(block.number - 1)) % MAX_PENGUINS;
         }
         // Prevent default sequence
         if (startingIndex == 0) {
