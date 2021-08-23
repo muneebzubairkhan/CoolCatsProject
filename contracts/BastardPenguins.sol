@@ -1,21 +1,21 @@
-// File: contracts/BoredApeYachtClub.sol
+// SPDX-License-Identifier: MIT
 
-// pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 /**
- * @title BoredApeYachtClub contract
+ * @title BastardPenguins contract
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation
  */
-contract BoredApeYachtClub is ERC721, Ownable {
-    using SafeMath for uint256;
-
-    string public BAYC_PROVENANCE = "";
+contract BastardPenguins is ERC721, Ownable {
+    string public BP_PROVENANCE = "";
 
     uint256 public startingIndexBlock;
 
     uint256 public startingIndex;
 
-    uint256 public constant apePrice = 80000000000000000; //0.08 ETH
+    uint256 public constant penguinPrice = 0.02 ether; // same as 0.02 * 1e18
 
     uint256 public constant maxApePurchase = 20;
 
@@ -62,7 +62,7 @@ contract BoredApeYachtClub is ERC721, Ownable {
      * Set provenance once it's calculated
      */
     function setProvenanceHash(string memory provenanceHash) public onlyOwner {
-        BAYC_PROVENANCE = provenanceHash;
+        BP_PROVENANCE = provenanceHash;
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner {
@@ -90,7 +90,7 @@ contract BoredApeYachtClub is ERC721, Ownable {
             "Purchase would exceed max supply of Apes"
         );
         require(
-            apePrice.mul(numberOfTokens) <= msg.value,
+            penguinPrice.mul(numberOfTokens) <= msg.value,
             "Ether value sent is not correct"
         );
 
@@ -108,7 +108,7 @@ contract BoredApeYachtClub is ERC721, Ownable {
             (totalSupply() == MAX_APES || block.timestamp >= REVEAL_TIMESTAMP)
             //                             1000th        >=          1500th
         ) {
-            startingIndexBlock = block.number; // Identity is revealed // 
+            startingIndexBlock = block.number; // Identity is revealed //
         }
     }
 
