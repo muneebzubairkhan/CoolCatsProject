@@ -24,7 +24,7 @@ contract CoolCars is ERC721Enumerable, Ownable {
 
     uint256 public constant maxCarPurchase = 20;
 
-    uint256 public MAX_PENGUINS;
+    uint256 public MAX_CARS;
 
     bool public saleIsActive = false;
 
@@ -36,7 +36,7 @@ contract CoolCars is ERC721Enumerable, Ownable {
         uint256 maxNftSupply,
         uint256 saleStart
     ) ERC721(name, symbol) {
-        MAX_PENGUINS = maxNftSupply;
+        MAX_CARS = maxNftSupply;
         REVEAL_TIMESTAMP = saleStart + 7 days;
     }
 
@@ -93,7 +93,7 @@ contract CoolCars is ERC721Enumerable, Ownable {
             "Can only mint 20 NFT at a time"
         );
         require(
-            totalSupply() + (numberOfTokens) <= MAX_PENGUINS,
+            totalSupply() + (numberOfTokens) <= MAX_CARS,
             "Purchase would exceed max supply of Cars"
         );
         require(
@@ -103,7 +103,7 @@ contract CoolCars is ERC721Enumerable, Ownable {
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
             uint256 mintIndex = totalSupply();
-            if (totalSupply() < MAX_PENGUINS) {
+            if (totalSupply() < MAX_CARS) {
                 _safeMint(msg.sender, mintIndex);
             }
         }
@@ -112,7 +112,7 @@ contract CoolCars is ERC721Enumerable, Ownable {
         // the end of pre-sale, set the starting index block
         if (
             startingIndexBlock == 0 && // if we have not set the startingIndexBlock
-            (totalSupply() == MAX_PENGUINS || // all cars are sold out
+            (totalSupply() == MAX_CARS || // all cars are sold out
                 block.timestamp >= REVEAL_TIMESTAMP) //
             //                             1000th        >=          1500th
         ) {
@@ -129,10 +129,10 @@ contract CoolCars is ERC721Enumerable, Ownable {
 
         // random() function of cool cars
         // startingIndex === startingIpfsId
-        startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_PENGUINS;
+        startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_CARS;
         // Just a sanity case in the worst case if this function is called late (EVM only stores last 256 block hashes)
         if (block.number - startingIndexBlock > 255) {
-            startingIndex = uint256(blockhash(block.number - 1)) % MAX_PENGUINS;
+            startingIndex = uint256(blockhash(block.number - 1)) % MAX_CARS;
         }
         // Prevent default sequence
         if (startingIndex == 0) {
