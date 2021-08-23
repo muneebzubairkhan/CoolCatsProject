@@ -7,21 +7,40 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-// 8.00-9.30
 contract GOATZ is ERC721, Ownable {
+    // SafeMath avoids all the illegal calculations in code
     using SafeMath for uint256;
 
+    // price of a goat
     uint256 public itemPrice;
+
+    // if isSaleActive then people can buy else they can not by
     bool public isSaleActive;
+
+    // totalSupply or how many max tokens or goats can exist
     uint256 public constant totalTokenToMint = 10000;
+
+    // purchasedGoatz how many goats are sold from this contract
+    // i.e initial purchasedGoatz = 0
+    // but when people started buying it went to purchasedGoatz = 100 etc
     uint256 public purchasedGoatz;
+
+    /// @notice startingIpfsId where the delivery will start from
+    ///
     uint256 public startingIpfsId;
     address public fundWallet;
+
+    // lastIp
     uint256 private _lastIpfsId;
 
-    constructor(string memory _tokenBaseUri, address _fundWallet)
-        ERC721("GOATz", "GOATZ")
-    {
+    // we are taking the core inputs when we are deploying the contract
+    // we can take input of name, symbol, wallet, etc
+    constructor(
+        string memory _tokenBaseUri,
+        address _fundWallet,
+        string memory _name,
+        string memory _symbol
+    ) ERC721(_name, _symbol) {
         _setBaseURI(_tokenBaseUri);
         itemPrice = 50000000000000000; // 0.05 ETH
         isSaleActive = true;
@@ -50,8 +69,11 @@ contract GOATZ is ERC721, Ownable {
         }
     }
 
-    //             . 560, 561, 562, ...
+    // 560, 561, 562, ...
     // 1,2,3,4,...560...10,000
+    //
+    // 1,2,3,.....,1000
+    //
     function _mintGoat(address _to) private {
         if (purchasedGoatz == 0) {
             _lastIpfsId = random(

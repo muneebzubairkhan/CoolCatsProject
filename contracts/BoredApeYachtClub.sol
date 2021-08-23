@@ -106,8 +106,9 @@ contract BoredApeYachtClub is ERC721, Ownable {
         if (
             startingIndexBlock == 0 &&
             (totalSupply() == MAX_APES || block.timestamp >= REVEAL_TIMESTAMP)
+            //                             1000th        >=          1500th
         ) {
-            startingIndexBlock = block.number;
+            startingIndexBlock = block.number; // Identity is revealed // 
         }
     }
 
@@ -119,6 +120,7 @@ contract BoredApeYachtClub is ERC721, Ownable {
         require(startingIndexBlock != 0, "Starting index block must be set");
 
         // random() function of bored apes
+        // startingIndex === startingIpfsId
         startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_APES;
         // Just a sanity case in the worst case if this function is called late (EVM only stores last 256 block hashes)
         if (block.number.sub(startingIndexBlock) > 255) {
