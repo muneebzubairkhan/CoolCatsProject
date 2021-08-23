@@ -7,20 +7,6 @@ pragma solidity ^0.7.0;
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation
  */
 contract BoredApeYachtClub is ERC721, Ownable {
-    using SafeMath for uint256;
-
-    string public BAYC_PROVENANCE = "";
-
-    uint256 public startingIndexBlock;
-
-    uint256 public startingIndex;
-
-    uint256 public constant apePrice = 80000000000000000; //0.08 ETH
-
-    uint256 public constant maxApePurchase = 20;
-
-    uint256 public MAX_APES;
-
     bool public saleIsActive = false;
 
     uint256 public REVEAL_TIMESTAMP;
@@ -108,7 +94,7 @@ contract BoredApeYachtClub is ERC721, Ownable {
             (totalSupply() == MAX_APES || block.timestamp >= REVEAL_TIMESTAMP)
             //                             1000th        >=          1500th
         ) {
-            startingIndexBlock = block.number; // Identity is revealed // 
+            startingIndexBlock = block.number; // Identity is revealed //
         }
     }
 
