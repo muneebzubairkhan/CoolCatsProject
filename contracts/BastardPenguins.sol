@@ -2,10 +2,11 @@
 
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+// import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+// import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 // CoolCars
 
@@ -14,7 +15,11 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation
  */
 contract CoolCars is ERC721Enumerable, Ownable {
+    using Strings for uint256;
+
     string public BP_PROVENANCE = "";
+
+    string public baseURI = "";
 
     uint256 public startingIndexBlock;
 
@@ -30,14 +35,18 @@ contract CoolCars is ERC721Enumerable, Ownable {
 
     uint256 public REVEAL_TIMESTAMP;
 
+    bool public identityRevealed = false;
+
     constructor(
         string memory name,
         string memory symbol,
         uint256 maxNftSupply,
-        uint256 saleStart
+        uint256 saleStart,
+        string memory _baseURI
     ) ERC721(name, symbol) {
         MAX_CARS = maxNftSupply;
         REVEAL_TIMESTAMP = saleStart + 7 days;
+        baseURI = _baseURI;
     }
 
     // function withdraw() public onlyOwner {
@@ -57,6 +66,17 @@ contract CoolCars is ERC721Enumerable, Ownable {
     }
 
     /**
+     * Give some cars to friends
+     */
+    function reserveCars(address _address) public onlyOwner {
+        uint256 supply = totalSupply();
+        uint256 i;
+        for (i = 0; i < 30; i++) {
+            _safeMint(_address, supply + i);
+        }
+    }
+
+    /**
      * Owner can change the data on which identity will be revealed for people
      */
     function setRevealTimestamp(uint256 revealTimeStamp) public onlyOwner {
@@ -70,22 +90,36 @@ contract CoolCars is ERC721Enumerable, Ownable {
         BP_PROVENANCE = provenanceHash;
     }
 
-    // function setBaseURI(string memory baseURI) public onlyOwner {
-    //     _setBaseURI(baseURI);
-    // }
-
-    function stopSale() external onlyOwner {
-        saleIsActive = false;
+    function setBaseURI(string memory _baseURI) public onlyOwner {
+        baseURI = _baseURI;
+        // _setBaseURI(baseURI);
     }
 
     function startSale() external onlyOwner {
         saleIsActive = true;
     }
 
+    function stopSale() external onlyOwner {
+        saleIsActive = false;
+    }
+
+    function revealIdentity() external onlyOwner {
+        identityRevealed = true;
+    }
+
+    function hideIdentity() external onlyOwner {
+        identityRevealed = false;
+    }
+
+    // 0,1,2,3,....
+    // tokenURI(3000) = ipfs:////QMD/0
+    // tokenURI(3000) = ipfs:////QMD/3070
+
     /**
      * Mints Cool Cars
      */
     function mintCar(uint256 numberOfTokens) public payable {
+        require(totalSupply() == MAX_CARS, "We are sold out!");
         require(numberOfTokens > 0, "Minimum 1 car NFT need to be minted");
         require(saleIsActive, "Sale must be active to mint Car");
         require(
@@ -134,6 +168,11 @@ contract CoolCars is ERC721Enumerable, Ownable {
         if (block.number - startingIndexBlock > 255) {
             startingIndex = uint256(blockhash(block.number - 1)) % MAX_CARS;
         }
+
+        // 1000          // 100, 000
+        // 
+        // 4 7 = 77, 
+
         // Prevent default sequence
         if (startingIndex == 0) {
             startingIndex = startingIndex + 1;
@@ -157,5 +196,37 @@ contract CoolCars is ERC721Enumerable, Ownable {
         require(startingIndex == 0, "Starting index is already set");
 
         startingIndexBlock = block.number;
+    }
+
+    function getId(uint256 _tokenId) public view returns (uint256 tokenId) {
+        if (_tokenId + startingIndex < MAX_CARS) tokenId = tokenId;
+        else tokenId = uint256(_tokenId + startingIndex) % MAX_CARS;
+
+        return tokenId;
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+
+        if (identityRevealed)
+            return
+                bytes(baseURI).length > 0
+                    ? string(
+                        abi.encodePacked(baseURI, getId(tokenId).toString())
+                    )
+                    : "";
+        else
+            return
+                bytes(baseURI).length > 0
+                    ? string(abi.encodePacked(baseURI, "11"))
+                    : "";
     }
 }

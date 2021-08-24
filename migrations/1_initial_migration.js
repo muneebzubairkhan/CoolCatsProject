@@ -3,7 +3,14 @@ const CoolCars = artifacts.require('CoolCars');
 
 module.exports = async deployer => {
   await deployer.deploy(Migrations);
-  await deployer.deploy(CoolCars, 'Cool Cars', 'CC', 10, 1629740587);
+  await deployer.deploy(
+    CoolCars,
+    'Cool Cars',
+    'CC',
+    10,
+    1629740587,
+    'https://gateway.pinata.cloud/ipfs/QmZqDyH57xnzHhS78L178S3iTmQnavWQcAj5hzrXPGZeYe/',
+  );
 };
 
 // 11PM, 23-8-21,
